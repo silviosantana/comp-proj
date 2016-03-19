@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TAM 1000
+#define TAM 2000
 char result[TAM];
 char aux[TAM];
 
 int end;
-
+//S(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))
 //S(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))((S(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(KK))K)
 
 void tiraParentese(char *result)
@@ -114,6 +114,7 @@ void k_combinator(char * str){
 
 	memcpy(str, result,sizeof(result));
 }
+//S(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))((S(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(KK))K)
 
 void s_combinator(char* str){
 	char a[TAM];
@@ -249,9 +250,5 @@ int main()
             printf("\n%s", result);
         }
     }
-
     return 0;
 }
-
-
-
