@@ -1,9 +1,7 @@
-// Gerador para K e S
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define TAM 2000
+#define TAM 100000000
 char result[TAM];
 char aux[TAM];
 
@@ -33,12 +31,13 @@ void tiraParentese(char *result)
         i++;
     }
     aux[i-2] = '\0';
-    memcpy(result,aux,sizeof(aux)+1);
+    memcpy(result,aux,i-1);
+    //memcpy(result,aux,sizeof(aux)+1);
     //resposta = aux;
 }
 
 void k_combinator(char * str){
-	char result[TAM];
+	//char result[TAM];
 	int count = 0;
 	int i, j;
 
@@ -52,14 +51,14 @@ void k_combinator(char * str){
     {
 		i = 1;
 		j = 0;
-		result[j] = str[i];
+		aux[j] = str[i];
 		j++;
 		i++;
-		result[j] = '\0';
+		aux[j] = '\0';
 	}
 	else
     {
-		result[0] = str[1];
+		aux[0] = str[1];
 		count = 1;
 		for (i = 2, j = 1; count > 0; i++, j++)
 		{
@@ -70,9 +69,9 @@ void k_combinator(char * str){
 			{
 				count--;
 			}
-			result[j] = str[i];
+			aux[j] = str[i];
 		}
-		result[j] = '\0';
+		aux[j] = '\0';
 	}
 
 	//ignore the second argument
@@ -104,27 +103,23 @@ void k_combinator(char * str){
 	//put the rest of the string into result
 	while (str[i] != '\0')
     {
-		result[j] = str[i];
+		aux[j] = str[i];
 		j++;
 		i++;
 	}
-	result[j] = '\0';
+	aux[j] = '\0';
 
-	//printf("%s\n", result);
-
-	memcpy(str, result,sizeof(result));
+	memcpy(str, aux, j+1);
 }
 //S(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))((S(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(S(S(KS)(S(KK)(SKK)))(K(S(SKK)(SKK))))(KK))K)
 
 void s_combinator(char* str){
-	char a[TAM];
-	char b[TAM];
-	char c[TAM];
-	char rest[TAM];
 	int i, j, count = 0;
+	int b_begin, b_end, c_begin, c_end;
+	int i_aux = 0; //save the current position of aux
 
-	//get the first argument and put it into a.
-
+	//get the first argument and put it into aux <aux = (a >.
+	aux[0] = '(';
 	if(str[1] == '\0')
     {
         end = 1;
@@ -133,93 +128,103 @@ void s_combinator(char* str){
 	else if (str[1] != '(')
     {
 		i = 1;
-		j = 0;
-		a[j] = str[i];
+		j = 1;
+		aux[j] = str[i];
+		i_aux = j;
 		j++;
 		i++;
-		a[j] = '\0';
 	}else{
-		a[0] = str[1];
+		aux[1] = str[1];
 		count = 1;
-		for (i = 2, j = 1; count > 0; i++, j++){
+		for (i = 2, j = 2; count > 0; i++, j++){
 			if (str[i] == '('){
 				count++;
 			}else if (str[i] == ')'){
 				count--;
 			}
-			a[j] = str[i];
+			aux[j] = str[i];
 		}
-		a[j] = '\0';
+		i_aux = j - 1;
 	}
-	//printf("%s\n", a);
 
-	//get the second argument and put it into b.
+	//get the beginning and eding indexes of b
+	b_begin = i;
 	if(str[i] == '\0')
     {
         end = 1;
         return ;
     }
 	else if (str[i] != '('){
-		b[0] = str[i];
-		b[1] = '\0';
+		b_end = i;
 		i++;
 	}else{
-		b[0] = str[i];
 		count = 1;
-		for (i ++, j = 1; count > 0; i++, j++){
+		for (i ++; count > 0; i++){
 			if (str[i] == '('){
 				count++;
 			}else if (str[i] == ')'){
 				count--;
 			}
-			b[j] = str[i];
 		}
-		b[j] = '\0';
+		b_end = i - 1;
 	}
-	//printf("%s\n", b);
 
-	//get the second argument and put it into b.
+	//get the beginning and eding indexes of c and concat aux and c <aux = (ac)>
+	c_begin = i;
+	j = i_aux + 1;
 	if(str[i] == '\0')
     {
         end = 1;
         return ;
     }
 	else if(str[i] != '('){
-		c[0] = str[i];
-		c[1] = '\0';
+		c_end = i;
+		aux[j] = str[i];
+		j++;
+		aux[j] = ')';
+		i_aux = j;
 		i++;
 	}else{
-		c[0] = str[i];
+		aux[j] = str[i];
 		count = 1;
-		for (i ++, j = 1; count > 0; i++, j++){
+		for (i ++, j++; count > 0; i++, j++){
 			if (str[i] == '('){
 				count++;
 			}else if (str[i] == ')'){
 				count--;
 			}
-			c[j] = str[i];
+			aux[j] = str[i];
 		}
-		c[j] = '\0';
+		aux[j] = ')';
+		i_aux = j;
+		c_end = i - 1;
 	}
-	//printf("%s\n", c);
 
-	j = 0;
+	i_aux ++;
+	aux[i_aux] = '('; // aux = "(ac)("
+
+	//concat aux and b <aux = (ac)(b>
+	for(i = b_begin, j = i_aux + 1; i <= b_end; i++, j++){
+		aux[j] = str[i];
+	}
+
+	//concat aux and c <aux = (ac)(bc)>
+	for(i = c_begin, j = j; i <= c_end; i++, j++){
+		aux[j] = str[i];
+	}
+	aux[j] = ')';
+
+	//concat aux and the rest of the string
+	i = c_end + 1;
+	j++;
 	while (str[i] != '\0'){
-		rest[j] = str[i];
+		aux[j] = str[i];
 		j++;
 		i++;
 	}
-	rest[j] = '\0';
 
-	//printf("%s\n", rest);
-
-	strcat(a,c);
-	strcat(b,c);
-	strcat(a,b);
-	strcat(a,rest); //a has the resulting string.
-
-	//printf("%s\n", a);
-	memcpy(str, a,sizeof(a));
+	aux[j] = '\0';
+	memcpy(str, aux, j + 1);
 }
 
 int main()
@@ -227,7 +232,7 @@ int main()
     freopen("in.txt", "r", stdin);
 
     scanf("%s", result);
-    printf("%s", result);
+    printf("%s\n", result);
 
     end = 0;
     while(end == 0)
@@ -235,20 +240,21 @@ int main()
         if(result[0] == '(')
         {
             tiraParentese(result);
-            printf("\n%s", result);
+            //printf("\n%s", result);
         }
         else if(result[0] == 'S')
         {
             //pegar 3 componentes e concatenar
             s_combinator(result);
-            printf("\n%s", result);
+            //printf("\n%s", result);
         }
         else //caso seja um K
         {
             //pegar 2 componentes e retornar o primeiro
             k_combinator(result);
-            printf("\n%s", result);
+            //printf("\n%s", result);
         }
     }
+    printf("%s\n", result);
     return 0;
 }
